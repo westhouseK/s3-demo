@@ -17,23 +17,27 @@ Class S3 implements file_manipulate {
                 'secret' => $secret_key,
             ],
             'version' => 'latest',
-            'region'  => 'ap-northeast-1'
+            'region'  => 'ap-northeast-1' // 定数化
         ]);
     }
 
-    public function get($where) {
+    // try-catchしたい
+    public function put($where, $args) {
+        extract($args);
+        return $this->s3->putObject([
+            'Bucket'       => $where,
+            'Key'          => $file_name,
+            'Body'         => $content,
+            'ContentType'  => 'application/json' // 使う側がセットしたい
+        ]);
+
+    }
+
+    // try-catchしたい
+    public function get($where, $args) {
         return $this->s3->getObject([
             'Bucket' => $where,
-            'Key' => 'my-object1',
-        ]);
-
-    }
-
-    public function save($where) {
-        return $this->s3->putObject([
-            'Bucket' => $where,
-            'Key' => 'my-object1',
-            'Body' => 'aaaa',
+            'Key'    => $args['file_name']
         ]);
     }
 
