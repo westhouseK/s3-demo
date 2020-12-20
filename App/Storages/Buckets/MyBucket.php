@@ -1,14 +1,19 @@
 <?php
 
-require_once(dirname(__FILE__).'/s3.php');
-require_once(dirname(__FILE__). '/../../env.php');
+namespace App\Storages\Buckets;
+
+require_once(dirname(__FILE__). '/../../../env.php');
+require_once(dirname(__FILE__). '/../../../vendor/autoload.php');
+require_once(dirname(__FILE__). '/bucket.php');
 
 use Aws\S3\S3Client;
+use App\Storages\Buckets\Bucket;
 
-final class Mybucket extends S3 {
+final class MyBucket extends Bucket {
 
-    protected $access_key = ACCESS_KEY;
-    protected $secret_key = SECRET_KEY;
+    protected $bucket_name = S3_BUCKET_NAME;
+    protected $access_key  = ACCESS_KEY;
+    protected $secret_key  = SECRET_KEY;
     
     private const CONTENT_TYPE = [
         '0' => 'application/json',
@@ -32,7 +37,7 @@ final class Mybucket extends S3 {
             'Bucket'       => $where,
             'Key'          => $file_name,
             'Body'         => $content,
-            'ContentType'  => self::CONTENT_TYPE[$prm['content_type']]
+            'ContentType'  => self::CONTENT_TYPE[$prms['content_type']]
         ]);
     }
 
