@@ -2,16 +2,15 @@
 
 namespace App\Storages\Buckets;
 
-require_once(dirname(__FILE__). '/../../Interfaces/FileAccessInterface.php');
+require_once(dirname(__FILE__). '/../../Interfaces/AccessStorageInterface.php');
 
+use App\Interfaces\AccessStorageInterface;
 
-use App\Interfaces\FileAccessInterface;
+/**
+ * S3バケット抽象クラス
+ */
+abstract class Bucket implements AccessStorageInterface{
 
-abstract class Bucket implements FileAccessInterface{
-
-    protected $access_key;
-    protected $secret_key;
-
-    abstract public function save(string $where, $prms);
-    abstract public function get(string $where, $prms);
+    abstract public function put(array $prms);
+    abstract public function get(array $prms);
 }

@@ -2,17 +2,14 @@
 
 namespace App\Storages\Locals;
 
-use App\Interfaces\FileAccessInterface;
+use App\Interfaces\AccessStorageInterface;
 
 /**
  * strategyパターンを利用
  */
-abstract class Local implements FileAccessInterface {
+abstract class Local implements AccessStorageInterface {
 
-    public function save(string $where, $prms) {
-        echo 'save';
-    }
-    public function get(string $where, $prms) {
-        echo 'get';
-    }
+    abstract public function put($prms);
+    abstract public function get($prms);
+
 }

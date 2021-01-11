@@ -2,42 +2,43 @@
 
 namespace App\Storages\Locals;
 
-require_once(dirname(__FILE__).'/../../../env.php');
+require_once(dirname(__FILE__).'/local.php');
 
-use App\Storages\Locals\Loval;
+use App\Storages\Locals\Local;
 
+/**
+ * ローカルへファイルを保存するクラス
+ */
 final class MyLocal extends Local {
 
-    public function __construct() {
-        $this->s3 = new S3Client([
-            'credentials' => [
-                'key' => $this->access_key,
-                'secret' => $this->secret_key,
-            ],
-            'version' => 'latest',
-            'region'  => self::REGION
-        ]);
-    }
-
-    public function save($where, $prms) {
+    /**
+     * 保存先のファイルを取得する
+     *
+     * @param [type] $prms
+     * @return int true: ファイルに書き込まれたバイト数、false: 保存失敗 
+     */
+    public function put(array $prms): int {
         extract($prms);
-        return $this->s3->putObject([
-            'Bucket'       => $where,
-            'Key'          => $file_name,
-            'Body'         => $content,
-            'ContentType'  => self::CONTENT_TYPE[$prm['content_type']]
-        ]);
+        // TODO: すでにファイルが存在する場合、エラーを返す
+        $dir = dirname(__FILE__). '../../../' . $full_path;
+        
+        // ディレクトリを作成する
+        mkdir($dir, 0777, true);
+
+        // ローカルに保存する
+        return file_put_contents($dir.$file_name, $content);
     }
 
-    public function get($where, $prms) {
-        return $this->s3->getObject([
-            'Bucket' => $where,
-            'Key'    => $prms['file_name']
-        ]);
-    }
 
-    public function get_content($where, $prms) {
-        $obj = $this->get($where, $prms);
-        return $obj['Body'];
+    /**
+     * ファイルを取得する
+     *
+     * @param array $prms
+     * @return mixed
+     */
+    public function get(array $prms) {
+        extract($prms);
+
+        return file_get_contents($full_path.$file_name, $content);
     }
 }

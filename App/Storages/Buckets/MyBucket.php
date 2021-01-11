@@ -2,28 +2,33 @@
 
 namespace App\Storages\Buckets;
 
-require_once(dirname(__FILE__). '/../../../env.php');
-require_once(dirname(__FILE__). '/../../../vendor/autoload.php');
-require_once(dirname(__FILE__). '/bucket.php');
+require_once (dirname(__FILE__). '/../../../env.php');
+require_once (dirname(__FILE__). '/../../../vendor/autoload.php');
+require_once (dirname(__FILE__). '/bucket.php');
 
 use Aws\S3\S3Client;
 use App\Storages\Buckets\Bucket;
 
-final class MyBucket extends Bucket {
+/**
+ * AWS SDK S3の具象クラス
+ */
+class MyBucket extends Bucket {
 
-    protected $bucket_name = S3_BUCKET_NAME;
-    protected $access_key  = ACCESS_KEY;
-    protected $secret_key  = SECRET_KEY;
-    
-    private const CONTENT_TYPE = [
-        '0' => 'application/json',
-    ];
+    /** S3インスタンス */
+    private $s3;
+
+    private $access_key  = ACCESS_KEY;
+    private $secret_key  = SECRET_KEY;
+    private $bucket_name = S3_BUCKET_NAME;
     private const REGION = 'ap-northeast-1';
 
+    /**
+     * S3インスタンスを初期化する
+     */
     public function __construct() {
         $this->s3 = new S3Client([
             'credentials' => [
-                'key' => $this->access_key,
+                'key'    => $this->access_key,
                 'secret' => $this->secret_key,
             ],
             'version' => 'latest',
@@ -31,25 +36,44 @@ final class MyBucket extends Bucket {
         ]);
     }
 
-    public function save($where, $prms) {
+    /**
+     * S3にオブジェクトを保存する
+     *
+     * @param array $prms
+     * @return object
+     */
+    public function put(array $prms): object {
         extract($prms);
         return $this->s3->putObject([
-            'Bucket'       => $where,
-            'Key'          => $file_name,
-            'Body'         => $content,
-            'ContentType'  => self::CONTENT_TYPE[$prms['content_type']]
+            'Bucket'      => S3_BUCKET_NAME,
+            'Key'         => $full_path.$file_name,
+            'Body'        => $content,
+            'ContentType' => $content_type
         ]);
     }
 
-    public function get($where, $prms) {
+    /**
+     * S3にオブジェクトを取得する
+     *
+     * @param array $prms
+     * @return object
+     */
+    public function get(array  $prms): object {
+        extract($prms);
         return $this->s3->getObject([
-            'Bucket' => $where,
-            'Key'    => $prms['file_name']
+            'Bucket' => S3_BUCKET_NAME,
+            'Key'    => $full_path.$file_name
         ]);
     }
 
-    public function get_content($where, $prms) {
-        $obj = $this->get($where, $prms);
-        return $obj['Body'];
+    /**
+     * S3からオブジェクトを取得し、その中身だけ抽出する
+     *
+     * @param [type] $prms
+     * @return any
+     */
+    public function get_contents($prms) {
+        $obj = $this->get($prms);
+        return $obj->get('Body');
     }
 }
